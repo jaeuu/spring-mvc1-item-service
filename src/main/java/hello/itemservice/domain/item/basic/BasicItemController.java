@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.annotation.PostConstruct;
 import java.util.List;
@@ -43,7 +44,7 @@ public class BasicItemController {
         return "basic/addForm";
     }
 
-    @PostMapping("/add")
+    //@PostMapping("/add")
     public String addItemV1(@RequestParam String itemName,
                             @RequestParam int price,
                             @RequestParam Integer quantity,
@@ -58,6 +59,48 @@ public class BasicItemController {
         model.addAttribute("item",item);
 
         return "basic/item";
+    }
+
+    //@PostMapping("/add")
+    public String addItemV2(@ModelAttribute("item") Item item, Model model){
+        itemRepository.save(item);
+        //model.addAttribute("item",item);
+        return "basic/item";
+    }
+
+    //@PostMapping("/add")
+    public String addItemV3(@ModelAttribute Item item){
+        itemRepository.save(item);
+        return "basic/item";
+    }
+
+    //@PostMapping("/add")
+    public String additemV5(@ModelAttribute Item item){
+        itemRepository.save(item);
+        return "redirect:/basic/items/" + item.getId();
+    }
+
+    @PostMapping("/add")
+    public String addItemV6(@ModelAttribute Item item, RedirectAttributes redirectAttributes){
+        Item savedItem = itemRepository.save(item);
+        redirectAttributes.addAttribute("itemId", savedItem.getId());
+        redirectAttributes.addAttribute("status", true);
+
+        return "redirect:/basic/items/{itemId}";
+    }
+
+    @GetMapping("/{itemId}/edit")
+    public String editForm(@PathVariable Long itemId, Model model){
+        Item item = itemRepository.findById(itemId);
+        model.addAttribute("item",item);
+
+        return "basic/editForm";
+    }
+
+    @PostMapping("/{itemId}/edit")
+    public String edit(@PathVariable Long itemId, @ModelAttribute Item item){
+        itemRepository.update(itemId, item);
+        return "redirect:/basic/items/{itemId}";
     }
 
 
